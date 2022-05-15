@@ -1,5 +1,5 @@
 make --dry-run --keep-going --print-directory
-make: Entering directory '/home/starnox/An2/PC_Homework3_HTTP'
-make: 'client' is up to date.
-make: Leaving directory '/home/starnox/An2/PC_Homework3_HTTP'
+make: Entering directory `/Users/eduard/Documents/Facultate/Projects/PC_Homework3_HTTP'
+g++ -I. -g -std=c++17 -o client client.cpp requests.cpp helpers.cpp buffer.cpp jsonparser.cpp
+make: Leaving directory `/Users/eduard/Documents/Facultate/Projects/PC_Homework3_HTTP'
  

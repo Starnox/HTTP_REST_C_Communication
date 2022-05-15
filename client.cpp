@@ -9,6 +9,7 @@
 #include "helpers.h"
 #include "requests.h"
 #include <string>
+#include "jsonparser.h"
 
 int main(int argc, char *argv[])
 {
@@ -37,6 +38,8 @@ int main(int argc, char *argv[])
     send_to_server(sockfd, message);
     response = receive_from_server(sockfd);
     puts(response);
+
+    test();
 
     // // Ex 3: GET weather key
     // char **cookies = (char **) calloc(1, sizeof(char *));
