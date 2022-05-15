@@ -10,28 +10,147 @@
 #include "requests.h"
 #include <string>
 #include "jsonparser.h"
+#include <iostream>
 
-int main(int argc, char *argv[])
+void login(int sockfd) {
+    char *message, *response;
+    char username[LINELEN];
+    char password[LINELEN];
+
+    // get the username
+    std::cout << "username=";
+    std::cin.getline(username, LINELEN);
+
+    // get the password
+    std::cout << "password=";
+    std::cin.getline(password, LINELEN);
+
+    // create post command
+    char **form_data = (char **) calloc(1, sizeof(char *));
+    for (int i = 0; i < 1; i++)
+    {
+        form_data[i] = (char *) calloc(LINELEN, sizeof(char));
+    }
+    form_data[0] = create_json_user(username, password);
+
+    message = compute_post_request(IP, AUTH_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1);
+    puts(message);
+    send_to_server(sockfd, message);
+    response = receive_from_server(sockfd);
+    puts(response);
+
+    free(message);
+    free(response);
+    free(form_data[0]);
+    free(form_data);
+}
+
+void reg(int sockfd) {
+    char *message, *response;
+    char username[LINELEN];
+    char password[LINELEN];
+
+    // get the username
+    std::cout << "username=";
+    std::cin.getline(username, LINELEN);
+
+    // get the password
+    std::cout << "password=";
+    std::cin.getline(password, LINELEN);
+
+    // create post command
+    char **form_data = (char **) calloc(1, sizeof(char *));
+    for (int i = 0; i < 1; i++)
+    {
+        form_data[i] = (char *) calloc(LINELEN, sizeof(char));
+    }
+    form_data[0] = create_json_user(username, password);
+    
+    message = compute_post_request(IP, REGISTER_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1);
+    puts(message);
+    send_to_server(sockfd, message);
+    response = receive_from_server(sockfd);
+    puts(response);
+
+
+    free(message);
+    message = NULL;
+
+    free(response);
+    response = NULL;
+
+    free(form_data[0]);
+    form_data[0] = NULL;
+
+    free(form_data);
+    form_data = NULL;
+}
+
+void enter_library(int sockfd) {
+
+}
+
+void get_books(int sockfd) {
+
+}
+
+void get_book(int sockfd) {
+
+}
+
+void add_book(int sockfd) {
+
+}
+
+void delete_book(int sockfd) {
+
+}
+
+void logout(int sockfd) {
+
+}
+
+
+int main()
 {
-    char IP[30] = "34.241.4.235";
-
-    char *message;
-    char *response;
     int sockfd;
-    // Ex 1.1: GET dummy
-    // Ex 1.2: POST dummy and print response
 
-    // Ex 2: Login
+    sockfd = open_connection(IP, PORT, AF_INET, SOCK_STREAM, 0);
 
-    sockfd = open_connection(IP, 8080, AF_INET, SOCK_STREAM, 0);
+    // Main loop of the program listen for commands while the command is not exit
+    
+    char command[LINELEN];
+    std::cin.getline(command, MAX_COMMAND_LEN);
+    while(strcmp(command, EXIT_COMMAND) != 0) {
+        if(strcmp(command, LOGIN_COMMAND) == 0)
+            login(sockfd);
+        else if(strcmp(command, REGISTER_COMMAND) == 0)
+            reg(sockfd);
+        else if(strcmp(command, ENTER_LIBRARY_COMMAND) == 0)
+            enter_library(sockfd);
+        else if(strcmp(command, GET_BOOKS_COMMAND) == 0)
+            get_books(sockfd);
+        else if(strcmp(command, GET_BOOK_COMMAND) == 0)
+            get_book(sockfd);
+        else if(strcmp(command, ADD_BOOK_COMMAND) == 0)
+            add_book(sockfd);
+        else if(strcmp(command, DELETE_BOOK_COMMAND) == 0)
+            delete_book(sockfd);
+        else if(strcmp(command, LOGOUT_COMMAND) == 0)
+            logout(sockfd);
 
+        std::cin.getline(command, MAX_COMMAND_LEN);
+    }
+    
+    
+    /*
     char **form_data = (char **) calloc(2, sizeof(char *));
     for (int i = 0; i < 2; i++)
     {
         form_data[i] = (char *) calloc(LINELEN, sizeof(char));
     }
-    strcpy(form_data[0], "username=student");
-    strcpy(form_data[1], "password=student");
+    sprintf(form_data[0], "username=%s", "student");
+    sprintf(form_data[1], "password=%s", "student");
 
     message = compute_post_request(IP, "/api/v1/auth/login", "application/x-www-form-urlencoded", form_data, 2, NULL, 1);
     puts(message);
@@ -40,6 +159,8 @@ int main(int argc, char *argv[])
     puts(response);
 
     test();
+    */
+
 
     // // Ex 3: GET weather key
     // char **cookies = (char **) calloc(1, sizeof(char *));
@@ -75,9 +196,11 @@ int main(int argc, char *argv[])
     // close(sockfd);
 
     // Ex 6: Logout
-
-    free(message);
-    free(response);
+    
+    // if(message != NULL)
+    //     free(message);
+    // if(response != NULL)
+    //     free(response);
 
     return 0;
 }

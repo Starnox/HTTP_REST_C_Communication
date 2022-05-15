@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun May 15 19:02:44 2022
+# Make data base, printed on Sun May 15 22:05:04 2022
 
 # Variables
 
@@ -41,7 +41,7 @@ VSCODE_NLS_CONFIG = {"locale":"en","availableLanguages":{}}
 # environment
 _ = /mnt/c/Users/eduar/AppData/Local/Programs/Microsoft VS Code/bin/code
 # makefile (from 'Makefile', line 2)
-CFLAGS = -Isingle_include/ -g -std=c++17
+CFLAGS = -Isingle_include/ -g -Wall -Wextra -std=c++17
 # makefile (from 'Makefile', line 1)
 MAKEFILE_LIST :=  Makefile
 # 'override' directive
@@ -63,7 +63,7 @@ API_ID_TELEGRAM = 14816646
 # environment
 VSCODE_LOG_STACK = false
 # environment
-VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-cb3417d3-ca3e-4395-9a06-957c99f5dea3.sock
+VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-0789f5f1-771d-4925-ba9e-5a0c726c13e3.sock
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -89,7 +89,7 @@ LESSCLOSE = /usr/bin/lesspipe %s %s
 # environment
 LOGNAME = starnox
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # automatic
@@ -220,7 +220,7 @@ requests.cpp:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-05-15 19:02:43.417356264
+#  Last modified 2022-05-15 20:16:14.27733065
 #  File has been updated.
 #  Successfully updated.
 
@@ -264,12 +264,12 @@ helpers.cpp:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 26 / storage = 250 B / avg = 9 B
-# current buf: size = 8162 B / used = 250 B / count = 26 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 25 / storage = 240 B / avg = 9 B
+# current buf: size = 8162 B / used = 240 B / count = 25 / avg = 9 B
 
-# strcache performance: lookups = 39 / hit rate = 33%
+# strcache performance: lookups = 39 / hit rate = 35%
 # hash-table stats:
-# Load=26/8192=0%, Rehash=0, Collisions=1/39=3%
-# Finished Make data base on Sun May 15 19:02:44 2022
+# Load=25/8192=0%, Rehash=0, Collisions=1/39=3%
+# Finished Make data base on Sun May 15 22:05:04 2022
 
  

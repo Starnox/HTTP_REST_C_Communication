@@ -101,5 +101,6 @@ char *compute_post_request(const char *host, const char *url, const char* conten
     strcat(message, body_data_buffer);
 
     free(line);
+    free(body_data_buffer);
     return message;
 }

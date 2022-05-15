@@ -4,6 +4,32 @@
 #define BUFLEN 4096
 #define LINELEN 1000
 
+#define IP "34.241.4.235"
+#define PORT 8080
+#define PAYLOAD_TYPE "application/json"
+#define REGISTER_ROUTE "/api/v1/tema/auth/register"
+#define AUTH_ROUTE " /api/v1/tema/auth/login"
+#define LIBRARY_ROUTE " /api/v1/tema/library/access"
+#define BOOK_ROUTE " /api/v1/tema/library/books/"
+#define ADD_BOOK_ROUTE " /api/v1/tema/library/books"
+#define DEAUTH_ROUTE  "/api/v1/tema/auth/logout"
+
+#define MAX_COMMAND_LEN 20
+#define LOGIN_COMMAND "login"
+#define REGISTER_COMMAND "register"
+#define ENTER_LIBRARY_COMMAND "enter_library"
+#define GET_BOOKS_COMMAND "get_books"
+#define GET_BOOK_COMMAND "get_book"
+#define ADD_BOOK_COMMAND "add_book"
+#define DELETE_BOOK_COMMAND "delete_book"
+#define LOGOUT_COMMAND "logout"
+#define EXIT_COMMAND "exit"
+
+typedef struct user {
+    char username[100];
+    char password[100];
+}user;
+
 // shows the current error
 void error(const char *msg);
 
