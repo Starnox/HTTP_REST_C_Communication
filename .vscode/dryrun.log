@@ -1,0 +1,5 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/starnox/An2/PC_Homework3_HTTP'
+make: 'client' is up to date.
+make: Leaving directory '/home/starnox/An2/PC_Homework3_HTTP'
+ 
