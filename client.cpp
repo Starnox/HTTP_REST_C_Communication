@@ -12,7 +12,7 @@
 #include "jsonparser.h"
 #include <iostream>
 
-void login(int sockfd) {
+void login(int *sockfd) {
     char *message, *response;
     char username[LINELEN];
     char password[LINELEN];
@@ -34,10 +34,30 @@ void login(int sockfd) {
     form_data[0] = create_json_user(username, password);
 
     message = compute_post_request(IP, AUTH_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1);
-    puts(message);
-    send_to_server(sockfd, message);
-    response = receive_from_server(sockfd);
-    puts(response);
+    //puts(message);
+
+    send_to_server(*sockfd, message);
+    response = receive_from_server(*sockfd);
+    if(strlen(response) == 0)  // check if the connection is still active
+        reopen_connection_and_send(sockfd, &response, message);
+
+
+    // extract json and parse
+    char *json_extract = basic_extract_json_response(response);
+
+    if(json_extract == NULL)
+    {
+        std::cout << "Too many requests\n";
+        return;
+    }
+
+    puts(json_extract);
+    json json_object = json::parse(json_extract);
+
+    if(json_object.contains("error"))
+        std::cout << "The credentials don't match the database" << "\n";
+    else
+        std::cout << "Logged in" << "\n";
 
     free(message);
     free(response);
@@ -45,7 +65,7 @@ void login(int sockfd) {
     free(form_data);
 }
 
-void reg(int sockfd) {
+void reg(int *sockfd) {
     char *message, *response;
     char username[LINELEN];
     char password[LINELEN];
@@ -67,23 +87,36 @@ void reg(int sockfd) {
     form_data[0] = create_json_user(username, password);
     
     message = compute_post_request(IP, REGISTER_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1);
-    puts(message);
-    send_to_server(sockfd, message);
-    response = receive_from_server(sockfd);
-    puts(response);
+    //puts(message);
+    send_to_server(*sockfd, message);
+    response = receive_from_server(*sockfd);
+
+    if(strlen(response) == 0)  // check if the connection is still active
+        reopen_connection_and_send(sockfd, &response, message);
+    
+    char *json_extract = basic_extract_json_response(response);
+
+    if(json_extract == NULL)
+    {
+        std::cout << "Too many requests\n";
+        return;
+    }
+
+    puts(json_extract);
+    json json_object = json::parse(json_extract);
+
+    
+
+    if(json_object.contains("error")) // check for error message
+        std::cout << "Username is already taken" << "\n";
+    else
+        std::cout << "Account created succesfully" << "\n";
 
 
     free(message);
-    message = NULL;
-
     free(response);
-    response = NULL;
-
     free(form_data[0]);
-    form_data[0] = NULL;
-
     free(form_data);
-    form_data = NULL;
 }
 
 void enter_library(int sockfd) {
@@ -122,10 +155,11 @@ int main()
     char command[LINELEN];
     std::cin.getline(command, MAX_COMMAND_LEN);
     while(strcmp(command, EXIT_COMMAND) != 0) {
+
         if(strcmp(command, LOGIN_COMMAND) == 0)
-            login(sockfd);
+            login(&sockfd);
         else if(strcmp(command, REGISTER_COMMAND) == 0)
-            reg(sockfd);
+            reg(&sockfd);
         else if(strcmp(command, ENTER_LIBRARY_COMMAND) == 0)
             enter_library(sockfd);
         else if(strcmp(command, GET_BOOKS_COMMAND) == 0)

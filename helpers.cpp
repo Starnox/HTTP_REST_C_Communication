@@ -14,6 +14,13 @@
 #define CONTENT_LENGTH "Content-Length: "
 #define CONTENT_LENGTH_SIZE (sizeof(CONTENT_LENGTH) - 1)
 
+void reopen_connection_and_send(int *sockfd, char **response, char *message) {
+    free(*response);
+    *sockfd = open_connection(IP, PORT, AF_INET, SOCK_STREAM, 0);
+    send_to_server(*sockfd, message);
+    *response = receive_from_server(*sockfd);
+}
+
 void error(const char *msg)
 {
     perror(msg);

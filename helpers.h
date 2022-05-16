@@ -30,6 +30,9 @@ typedef struct user {
     char password[100];
 }user;
 
+// reopens the connection and send the message again
+void reopen_connection_and_send(int *sockfd, char **response, char *message);
+
 // shows the current error
 void error(const char *msg);
 

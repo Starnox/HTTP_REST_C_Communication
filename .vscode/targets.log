@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun May 15 22:05:04 2022
+# Make data base, printed on Mon May 16 09:07:12 2022
 
 # Variables
 
@@ -63,7 +63,7 @@ API_ID_TELEGRAM = 14816646
 # environment
 VSCODE_LOG_STACK = false
 # environment
-VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-0789f5f1-771d-4925-ba9e-5a0c726c13e3.sock
+VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-07ee1e47-2512-4330-8337-1fb4de321a50.sock
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -77,9 +77,9 @@ PWD = /home/starnox/An2/PC_Homework3_HTTP
 # default
 .LOADED := 
 # environment
-WSL_INTEROP = /run/WSL/170_interop
+WSL_INTEROP = /run/WSL/167_interop
 # environment
-WT_SESSION = 00259750-2717-4ede-a804-dcef7819e266
+WT_SESSION = 5be76ac7-7365-4353-852e-d65d936a6e45
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
@@ -270,6 +270,6 @@ helpers.cpp:
 # strcache performance: lookups = 39 / hit rate = 35%
 # hash-table stats:
 # Load=25/8192=0%, Rehash=0, Collisions=1/39=3%
-# Finished Make data base on Sun May 15 22:05:04 2022
+# Finished Make data base on Mon May 16 09:07:12 2022
 
  
