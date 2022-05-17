@@ -1,5 +1,0 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory '/home/starnox/An2/PC_Homework3_HTTP'
-g++ -Isingle_include/ -g -Wall -Wextra -std=c++17 -o client client.cpp requests.cpp helpers.cpp buffer.cpp jsonparser.cpp
-make: Leaving directory '/home/starnox/An2/PC_Homework3_HTTP'
- 

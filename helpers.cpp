@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include "helpers.h"
 #include "buffer.h"
+#include "string.h"
 
 #define HEADER_TERMINATOR "\r\n\r\n"
 #define HEADER_TERMINATOR_SIZE (sizeof(HEADER_TERMINATOR) - 1)
@@ -135,4 +136,30 @@ char *receive_from_server(int sockfd)
 char *basic_extract_json_response(char *str)
 {
     return strstr(str, "{\"");
+}
+
+bool check_respond(char *response) {
+    char substring[4];
+    memcpy(substring, response + 9, 3);
+    substring[3] = '\0';
+
+    int response_code = atoi(substring);
+    if(response_code >= 200 && response_code < 300)
+        return true;
+    return false;
+}
+
+/**
+ * @brief Get the session cookie
+ * 
+ * @param response the response from which to extract the cookie
+ * @return char* a string that needs to be freed
+ */
+void get_session_cookie(char *response, char *buffer) {
+    char *start_point = strstr(response, "connect.sid");
+    int begin = start_point - response;
+    char *end_point = strstr(response, "Date");
+    int end = end_point - response;
+
+    memcpy(buffer, start_point, end - begin);
 }

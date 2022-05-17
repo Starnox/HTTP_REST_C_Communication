@@ -3,6 +3,7 @@
 
 #define BUFLEN 4096
 #define LINELEN 1000
+#define SESSION_COOKIE_LEN 200
 
 #define IP "34.241.4.235"
 #define PORT 8080
@@ -53,5 +54,9 @@ char *receive_from_server(int sockfd);
 
 // extracts and returns a JSON from a server response
 char *basic_extract_json_response(char *str);
+
+bool check_respond(char *response);
+
+void get_session_cookie(char *response, char *buffer);
 
 #endif

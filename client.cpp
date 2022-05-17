@@ -12,6 +12,9 @@
 #include "jsonparser.h"
 #include <iostream>
 
+bool logged_in;
+char *session_cookie;
+
 void login(int *sockfd) {
     char *message, *response;
     char username[LINELEN];
@@ -27,37 +30,37 @@ void login(int *sockfd) {
 
     // create post command
     char **form_data = (char **) calloc(1, sizeof(char *));
-    for (int i = 0; i < 1; i++)
-    {
-        form_data[i] = (char *) calloc(LINELEN, sizeof(char));
-    }
     form_data[0] = create_json_user(username, password);
 
     message = compute_post_request(IP, AUTH_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1);
-    //puts(message);
 
     send_to_server(*sockfd, message);
     response = receive_from_server(*sockfd);
     if(strlen(response) == 0)  // check if the connection is still active
         reopen_connection_and_send(sockfd, &response, message);
 
+    puts(response);
 
+    if(!check_respond(response))
+        std::cout << "The credentials don't match the database" << "\n";
+    else {
+        std::cout << "Logged in" << "\n";
+        // extract session cookie
+        get_session_cookie(response, session_cookie);
+        // marked the user as logged in
+        logged_in = true;
+        printf("%s\n", session_cookie);
+    }
+
+    /*
     // extract json and parse
     char *json_extract = basic_extract_json_response(response);
-
-    if(json_extract == NULL)
-    {
-        std::cout << "Too many requests\n";
-        return;
-    }
 
     puts(json_extract);
     json json_object = json::parse(json_extract);
 
     if(json_object.contains("error"))
-        std::cout << "The credentials don't match the database" << "\n";
-    else
-        std::cout << "Logged in" << "\n";
+    */
 
     free(message);
     free(response);
@@ -80,10 +83,6 @@ void reg(int *sockfd) {
 
     // create post command
     char **form_data = (char **) calloc(1, sizeof(char *));
-    for (int i = 0; i < 1; i++)
-    {
-        form_data[i] = (char *) calloc(LINELEN, sizeof(char));
-    }
     form_data[0] = create_json_user(username, password);
     
     message = compute_post_request(IP, REGISTER_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1);
@@ -94,23 +93,24 @@ void reg(int *sockfd) {
     if(strlen(response) == 0)  // check if the connection is still active
         reopen_connection_and_send(sockfd, &response, message);
     
-    char *json_extract = basic_extract_json_response(response);
+    puts(response);
 
-    if(json_extract == NULL)
-    {
-        std::cout << "Too many requests\n";
-        return;
+    if(!check_respond(response))
+        std::cout << "The username is already taken" << "\n";
+    else {
+        std::cout << "Sign up successfuly" << "\n";
     }
 
+    /*
+    char *json_extract = basic_extract_json_response(response);
     puts(json_extract);
     json json_object = json::parse(json_extract);
-
-    
 
     if(json_object.contains("error")) // check for error message
         std::cout << "Username is already taken" << "\n";
     else
         std::cout << "Account created succesfully" << "\n";
+    */
 
 
     free(message);
@@ -119,8 +119,31 @@ void reg(int *sockfd) {
     free(form_data);
 }
 
-void enter_library(int sockfd) {
+void enter_library(int *sockfd) {
+    char *message, *response;
+    char **cookies = (char **) calloc(1,sizeof(char*));
+    cookies[0] = session_cookie;
+    message = compute_get_request(IP, LIBRARY_ROUTE ,NULL, cookies, 1, NULL);
 
+    send_to_server(*sockfd, message);
+    response = receive_from_server(*sockfd);
+
+    if(strlen(response) == 0)  // check if the connection is still active
+        reopen_connection_and_send(sockfd, &response, message);
+
+    puts(response);
+    if(!check_respond(response)) {
+        std::cout << "You are not logged in\n";
+       
+    }
+    else {
+        char *token = NULL;
+        std::cout << "Entered the library succesfully with Token:\n" << "" << "\n";
+    }
+
+    free(cookies);
+    free(message);
+    free(response);
 }
 
 void get_books(int sockfd) {
@@ -139,16 +162,39 @@ void delete_book(int sockfd) {
 
 }
 
-void logout(int sockfd) {
+void logout(int *sockfd) {
+    char *message, *response;
+    char **cookies = (char **) calloc(1,sizeof(char*));
+    cookies[0] = session_cookie;
+    message = compute_get_request(IP, DEAUTH_ROUTE,NULL, cookies, 1, NULL);
 
+    send_to_server(*sockfd, message);
+    response = receive_from_server(*sockfd);
+
+    if(strlen(response) == 0)  // check if the connection is still active
+        reopen_connection_and_send(sockfd, &response, message);
+
+    puts(response);
+    if(!check_respond(response))
+        std::cout << "You are not logged in\n";
+    else {
+        std::cout << "Logged out succesfully\n";
+    }
+
+    free(cookies);
+    free(message);
+    free(response);
 }
 
 
 int main()
 {
     int sockfd;
-
     sockfd = open_connection(IP, PORT, AF_INET, SOCK_STREAM, 0);
+
+    // initialisation of global variables
+    session_cookie = (char *) calloc(SESSION_COOKIE_LEN, sizeof(char));
+    logged_in = false;
 
     // Main loop of the program listen for commands while the command is not exit
     
@@ -161,7 +207,7 @@ int main()
         else if(strcmp(command, REGISTER_COMMAND) == 0)
             reg(&sockfd);
         else if(strcmp(command, ENTER_LIBRARY_COMMAND) == 0)
-            enter_library(sockfd);
+            enter_library(&sockfd);
         else if(strcmp(command, GET_BOOKS_COMMAND) == 0)
             get_books(sockfd);
         else if(strcmp(command, GET_BOOK_COMMAND) == 0)
@@ -171,11 +217,10 @@ int main()
         else if(strcmp(command, DELETE_BOOK_COMMAND) == 0)
             delete_book(sockfd);
         else if(strcmp(command, LOGOUT_COMMAND) == 0)
-            logout(sockfd);
+            logout(&sockfd);
 
         std::cin.getline(command, MAX_COMMAND_LEN);
     }
-    
     
     /*
     char **form_data = (char **) calloc(2, sizeof(char *));
@@ -235,6 +280,8 @@ int main()
     //     free(message);
     // if(response != NULL)
     //     free(response);
+
+    free(session_cookie);
 
     return 0;
 }

@@ -10,7 +10,7 @@
 #include "requests.h"
 
 char *compute_get_request(const char *host, const char *url, const char *query_params,
-                            char **cookies, int cookies_count)
+                            char **cookies, int cookies_count, char *token)
 {
     char *message = (char *) calloc(BUFLEN, sizeof(char));
     char *line = (char *) calloc(LINELEN, sizeof(char));
@@ -43,8 +43,15 @@ char *compute_get_request(const char *host, const char *url, const char *query_p
         compute_message(message, line);
     }
 
+    // add token if it exits
+    if (token != NULL) {
+        sprintf(line, "Authorization: Bearer %s",token);
+        compute_message(message, line);
+    }
+
     // Step 4: add final new line
     compute_message(message, "");
+    free(line);
     return message;
 }
 
