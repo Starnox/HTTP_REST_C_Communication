@@ -8,6 +8,9 @@ char *compute_get_request(const char *host, const char *url, const char *query_p
 
 // computes and returns a POST request string (cookies can be NULL if not needed)
 char *compute_post_request(const char *host, const char *url, const char* content_type, char **body_data,
-							int body_data_fields_count, char** cookies, int cookies_count);
+							int body_data_fields_count, char** cookies, int cookies_count, char *token);
+
+char *compute_delete_request(const char *host, const char *url,
+                            char **cookies, int cookies_count, char *token);
 
 #endif

@@ -56,7 +56,7 @@ char *compute_get_request(const char *host, const char *url, const char *query_p
 }
 
 char *compute_post_request(const char *host, const char *url, const char* content_type, char **body_data,
-                            int body_data_fields_count, char **cookies, int cookies_count)
+                            int body_data_fields_count, char **cookies, int cookies_count, char *token)
 {
     char *message = (char *) calloc(BUFLEN, sizeof(char));
     char *line = (char *) calloc(LINELEN, sizeof(char));
@@ -70,6 +70,13 @@ char *compute_post_request(const char *host, const char *url, const char* conten
     memset(line, 0, LINELEN);
     sprintf(line, "Host: %s", host);
     compute_message(message, line);
+
+
+    // add token if it exits
+    if (token != NULL) {
+        sprintf(line, "Authorization: Bearer %s",token);
+        compute_message(message, line);
+    }
 
     // Step 3: add necessary headers (Content-Type and Content-Length are mandatory)
     int body_data_size = 0;
@@ -109,5 +116,47 @@ char *compute_post_request(const char *host, const char *url, const char* conten
 
     free(line);
     free(body_data_buffer);
+    return message;
+}
+
+char *compute_delete_request(const char *host, const char *url,
+                            char **cookies, int cookies_count, char *token)
+{
+    char *message = (char *) calloc(BUFLEN, sizeof(char));
+    char *line = (char *) calloc(LINELEN, sizeof(char));
+
+    // Step 1: write the method name, URL, request params (if any) and protocol type
+
+    sprintf(line, "DELETE %s HTTP/1.1", url);
+    compute_message(message, line);
+
+    // Step 2: add the host
+    memset(line, 0, LINELEN);
+    sprintf(line, "Host: %s", host);
+    compute_message(message, line);
+
+    // Step 3 (optional): add headers and/or cookies, according to the protocol format
+    if (cookies != NULL) {
+        memset(line, 0, LINELEN);
+        strcat(line, "Cookie: ");
+
+        for (int i = 0; i < cookies_count - 1; i++) {
+            strcat(line, cookies[i]);
+            strcat(line, ";");
+        }
+
+        strcat(line, cookies[cookies_count - 1]);
+        compute_message(message, line);
+    }
+
+    // add token if it exits
+    if (token != NULL) {
+        sprintf(line, "Authorization: Bearer %s",token);
+        compute_message(message, line);
+    }
+
+    // Step 4: add final new line
+    compute_message(message, "");
+    free(line);
     return message;
 }

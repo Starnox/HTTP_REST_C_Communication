@@ -14,6 +14,7 @@
 
 bool logged_in;
 char *session_cookie;
+char *token;
 
 void login(int *sockfd) {
     char *message, *response;
@@ -32,14 +33,13 @@ void login(int *sockfd) {
     char **form_data = (char **) calloc(1, sizeof(char *));
     form_data[0] = create_json_user(username, password);
 
-    message = compute_post_request(IP, AUTH_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1);
+    message = compute_post_request(IP, AUTH_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1, NULL);
 
     send_to_server(*sockfd, message);
     response = receive_from_server(*sockfd);
     if(strlen(response) == 0)  // check if the connection is still active
         reopen_connection_and_send(sockfd, &response, message);
 
-    puts(response);
 
     if(!check_respond(response))
         std::cout << "The credentials don't match the database" << "\n";
@@ -51,16 +51,6 @@ void login(int *sockfd) {
         logged_in = true;
         printf("%s\n", session_cookie);
     }
-
-    /*
-    // extract json and parse
-    char *json_extract = basic_extract_json_response(response);
-
-    puts(json_extract);
-    json json_object = json::parse(json_extract);
-
-    if(json_object.contains("error"))
-    */
 
     free(message);
     free(response);
@@ -85,7 +75,7 @@ void reg(int *sockfd) {
     char **form_data = (char **) calloc(1, sizeof(char *));
     form_data[0] = create_json_user(username, password);
     
-    message = compute_post_request(IP, REGISTER_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1);
+    message = compute_post_request(IP, REGISTER_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1, NULL);
     //puts(message);
     send_to_server(*sockfd, message);
     response = receive_from_server(*sockfd);
@@ -93,25 +83,12 @@ void reg(int *sockfd) {
     if(strlen(response) == 0)  // check if the connection is still active
         reopen_connection_and_send(sockfd, &response, message);
     
-    puts(response);
 
     if(!check_respond(response))
         std::cout << "The username is already taken" << "\n";
     else {
         std::cout << "Sign up successfuly" << "\n";
     }
-
-    /*
-    char *json_extract = basic_extract_json_response(response);
-    puts(json_extract);
-    json json_object = json::parse(json_extract);
-
-    if(json_object.contains("error")) // check for error message
-        std::cout << "Username is already taken" << "\n";
-    else
-        std::cout << "Account created succesfully" << "\n";
-    */
-
 
     free(message);
     free(response);
@@ -131,14 +108,14 @@ void enter_library(int *sockfd) {
     if(strlen(response) == 0)  // check if the connection is still active
         reopen_connection_and_send(sockfd, &response, message);
 
-    puts(response);
     if(!check_respond(response)) {
         std::cout << "You are not logged in\n";
        
     }
     else {
-        char *token = NULL;
-        std::cout << "Entered the library succesfully with Token:\n" << "" << "\n";
+        char *json_response = basic_extract_json_response(response);
+        get_token(json_response, token);
+        std::cout << "Entered the library succesfully with Token:\n" << token << "\n";
     }
 
     free(cookies);
@@ -146,20 +123,181 @@ void enter_library(int *sockfd) {
     free(response);
 }
 
-void get_books(int sockfd) {
+void get_books(int *sockfd) {
+    if(strlen(token) == 0) {
+        std::cout << "You don't have access to the library\n";
+        return;
+    }
+    char *message, *response;
+    message = compute_get_request(IP, BOOK_ROUTE ,NULL, NULL, 1, token);
+
+    send_to_server(*sockfd, message);
+    response = receive_from_server(*sockfd);
+
+    if(strlen(response) == 0)  // check if the connection is still active
+        reopen_connection_and_send(sockfd, &response, message);
+
+    if(!check_respond(response)) {
+        std::cout << "You don't have access to the library\n";
+       
+    }
+    else {
+        char *json_response = basic_extract_json_response(response);
+        parse_books_and_print(json_response);
+    }
+
+    free(message);
+    free(response);
+}
+
+void get_book(int *sockfd) {
+    if(strlen(token) == 0) {
+        std::cout << "You don't have access to the library\n";
+        return;
+    }
+    char id[LINELEN];
+    int int_id;
+
+    std::cout << "id=";
+    std::cin.getline(id, LINELEN);
+
+    int_id = atoi(id);
+    if(int_id == 0) { // check id intregrity
+        std::cout << "Id-ul introdus trebuie sa fie un numar intreg\n";
+        return;
+    }
+
+    char *message, *response;
+    char book_route_id[LINELEN];
+    sprintf(book_route_id, "%s/%d", BOOK_ROUTE, int_id);
+    
+    message = compute_get_request(IP, book_route_id ,NULL, NULL, 1, token);
+
+    send_to_server(*sockfd, message);
+    response = receive_from_server(*sockfd);
+
+    if(strlen(response) == 0)  // check if the connection is still active
+        reopen_connection_and_send(sockfd, &response, message);
+
+    if(!check_respond(response)) {
+        std::cout << "Id-ul introdus este invalid\n";
+       
+    }
+    else {
+        char *json_response = basic_extract_json_response(response);
+        parse_books_and_print(json_response);
+    }
+
+    free(message);
+    free(response);
+}
+
+void add_book(int *sockfd) {
+    if(strlen(token) == 0) {
+        std::cout << "You don't have access to the library\n";
+        return;
+    }
+    char title[LINELEN];
+    char author[LINELEN];
+    char genre[LINELEN];
+    char publisher[LINELEN];
+    char page_count[LINELEN];
+
+    // get the title
+    std::cout << "title=";
+    std::cin.getline(title, LINELEN);
+
+    // get the author
+    std::cout << "author=";
+    std::cin.getline(author, LINELEN);
+
+    // get the genre
+    std::cout << "genre=";
+    std::cin.getline(genre, LINELEN);
+
+    // get the publisher
+    std::cout << "publisher=";
+    std::cin.getline(publisher, LINELEN);
+
+    // get the page_count
+    std::cout << "page_count=";
+    std::cin.getline(page_count, LINELEN);
+
+    int int_page_count = atoi(page_count);
+    if(int_page_count == 0) {
+        std::cout << "You need to enter an integer for the page count\n";
+        return;
+    }
+
+    char *message = NULL, *response= NULL;
+
+    // create post command
+    char **form_data = (char **) calloc(1, sizeof(char *));
+    form_data[0] = create_json_book(title, author, genre, publisher, int_page_count);
+        
+    message = compute_post_request(IP, ADD_BOOK_ROUTE, PAYLOAD_TYPE, form_data, 1, NULL, 1, token);
+    send_to_server(*sockfd, message);
+    response = receive_from_server(*sockfd);
+
+    if(strlen(response) == 0)  // check if the connection is still active
+        reopen_connection_and_send(sockfd, &response, message);
+    
+
+    if(!check_respond(response))
+        std::cout << "Add book failed" << "\n";
+    else {
+        std::cout << "Book added succesfully" << "\n";
+    }
+
+    if(message != NULL )
+        free(message);
+    if(response != NULL)
+        free(response);
+    if(form_data[0] != NULL)
+        free(form_data[0]);
+    free(form_data);
 
 }
 
-void get_book(int sockfd) {
+void delete_book(int *sockfd) {
+    if(strlen(token) == 0) {
+        std::cout << "You don't have access to the library\n";
+        return;
+    }
+    char id[LINELEN];
+    int int_id;
 
-}
+    std::cout << "id=";
+    std::cin.getline(id, LINELEN);
 
-void add_book(int sockfd) {
+    int_id = atoi(id);
+    if(int_id == 0) { // check id intregrity
+        std::cout << "Id-ul introdus trebuie sa fie un numar intreg\n";
+        return;
+    }
 
-}
+    char *message, *response;
+    char book_route_id[LINELEN];
+    sprintf(book_route_id, "%s/%d", BOOK_ROUTE, int_id);
+    
+    message = compute_delete_request(IP, book_route_id, NULL, 1, token);
 
-void delete_book(int sockfd) {
+    send_to_server(*sockfd, message);
+    response = receive_from_server(*sockfd);
 
+    if(strlen(response) == 0)  // check if the connection is still active
+        reopen_connection_and_send(sockfd, &response, message);
+
+    if(!check_respond(response)) {
+        std::cout << "Id-ul introdus este invalid\n";
+       
+    }
+    else {
+        std::cout << "Cartea a fost eliminata cu success\n";
+    }
+
+    free(message);
+    free(response);
 }
 
 void logout(int *sockfd) {
@@ -174,13 +312,14 @@ void logout(int *sockfd) {
     if(strlen(response) == 0)  // check if the connection is still active
         reopen_connection_and_send(sockfd, &response, message);
 
-    puts(response);
     if(!check_respond(response))
         std::cout << "You are not logged in\n";
     else {
         std::cout << "Logged out succesfully\n";
     }
 
+    memset(session_cookie, 0, SESSION_COOKIE_LEN);
+    memset(token, 0, TOKEN_LEN);
     free(cookies);
     free(message);
     free(response);
@@ -194,6 +333,7 @@ int main()
 
     // initialisation of global variables
     session_cookie = (char *) calloc(SESSION_COOKIE_LEN, sizeof(char));
+    token = (char *) calloc(TOKEN_LEN, sizeof(char));
     logged_in = false;
 
     // Main loop of the program listen for commands while the command is not exit
@@ -209,79 +349,21 @@ int main()
         else if(strcmp(command, ENTER_LIBRARY_COMMAND) == 0)
             enter_library(&sockfd);
         else if(strcmp(command, GET_BOOKS_COMMAND) == 0)
-            get_books(sockfd);
+            get_books(&sockfd);
         else if(strcmp(command, GET_BOOK_COMMAND) == 0)
-            get_book(sockfd);
+            get_book(&sockfd);
         else if(strcmp(command, ADD_BOOK_COMMAND) == 0)
-            add_book(sockfd);
+            add_book(&sockfd);
         else if(strcmp(command, DELETE_BOOK_COMMAND) == 0)
-            delete_book(sockfd);
+            delete_book(&sockfd);
         else if(strcmp(command, LOGOUT_COMMAND) == 0)
             logout(&sockfd);
 
         std::cin.getline(command, MAX_COMMAND_LEN);
     }
-    
-    /*
-    char **form_data = (char **) calloc(2, sizeof(char *));
-    for (int i = 0; i < 2; i++)
-    {
-        form_data[i] = (char *) calloc(LINELEN, sizeof(char));
-    }
-    sprintf(form_data[0], "username=%s", "student");
-    sprintf(form_data[1], "password=%s", "student");
-
-    message = compute_post_request(IP, "/api/v1/auth/login", "application/x-www-form-urlencoded", form_data, 2, NULL, 1);
-    puts(message);
-    send_to_server(sockfd, message);
-    response = receive_from_server(sockfd);
-    puts(response);
-
-    test();
-    */
-
-
-    // // Ex 3: GET weather key
-    // char **cookies = (char **) calloc(1, sizeof(char *));
-    // cookies[0] = (char *) calloc(LINELEN, sizeof(char));
-
-    // strcpy(cookies[0], "connect.sid=s%3Aoy5V6CLDYPGv8SqYq6yzvXL-BpCKiCC1.BEK0tJsEWKyuecGp7ADt%2FNheOkMF7Ov3EcngkQmgHnE");
-    // message = compute_get_request("37.139.20.5", "/api/v1/weather/key", NULL, cookies, 1);
-    // puts(message);
-    // send_to_server(sockfd, message);
-    // response = receive_from_server(sockfd);
-    // puts(response);
-    // close(sockfd);
-
-    // // Ex 4: GET weather data from OpenWeather API
-    // sockfd = open_connection("37.139.20.5", 80, AF_INET, SOCK_STREAM, 0);
-    // message = compute_get_request("api.openweathermap.org", "/data/2.5/weather", "lat=44.7398&lon=22.2767&appid=b912dd495585fbf756dc6d8f415a7649", NULL, 0);
-    // puts(message);
-    // send_to_server(sockfd, message);
-    // response = receive_from_server(sockfd);
-    // puts(response);
-    // close(sockfd);
-
-    // Ex 5: POST weather data for verification
-    // sockfd = open_connection("127.0.0.1", 8080, AF_INET, SOCK_STREAM, 0);
-    // char **json_data = calloc(1, sizeof(char *));
-    // json_data[0] = calloc(LINELEN, sizeof(char));
-    // strcpy(json_data[0], basic_extract_json_response(response));
-    // message = compute_post_request("localhost", "/api/v1/weather/44.7398/22.2767", "application/json", json_data, 1, cookies, 1);
-    // puts(message);
-    // send_to_server(sockfd, message);
-    // response = receive_from_server(sockfd);
-    // puts(response);
-    // close(sockfd);
-
-    // Ex 6: Logout
-    
-    // if(message != NULL)
-    //     free(message);
-    // if(response != NULL)
-    //     free(response);
 
     free(session_cookie);
+    free(token);
 
     return 0;
 }

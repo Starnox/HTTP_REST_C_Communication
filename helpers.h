@@ -4,6 +4,7 @@
 #define BUFLEN 4096
 #define LINELEN 1000
 #define SESSION_COOKIE_LEN 200
+#define TOKEN_LEN 300
 
 #define IP "34.241.4.235"
 #define PORT 8080
@@ -11,7 +12,7 @@
 #define REGISTER_ROUTE "/api/v1/tema/auth/register"
 #define AUTH_ROUTE " /api/v1/tema/auth/login"
 #define LIBRARY_ROUTE " /api/v1/tema/library/access"
-#define BOOK_ROUTE " /api/v1/tema/library/books/"
+#define BOOK_ROUTE " /api/v1/tema/library/books"
 #define ADD_BOOK_ROUTE " /api/v1/tema/library/books"
 #define DEAUTH_ROUTE  "/api/v1/tema/auth/logout"
 
