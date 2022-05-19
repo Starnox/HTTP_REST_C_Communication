@@ -114,7 +114,7 @@ void enter_library(int *sockfd) {
     else {
         char *json_response = basic_extract_json_response(response);
         get_token(json_response, token);
-        std::cout << "Entered the library succesfully\n";
+        std::cout << "Entered the library succesfully with token: \n" << token << "\n";
     }
 
     free(cookies);
