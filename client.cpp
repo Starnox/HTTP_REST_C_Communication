@@ -49,7 +49,6 @@ void login(int *sockfd) {
         get_session_cookie(response, session_cookie);
         // marked the user as logged in
         logged_in = true;
-        printf("%s\n", session_cookie);
     }
 
     free(message);
@@ -115,7 +114,7 @@ void enter_library(int *sockfd) {
     else {
         char *json_response = basic_extract_json_response(response);
         get_token(json_response, token);
-        std::cout << "Entered the library succesfully with Token:\n" << token << "\n";
+        std::cout << "Entered the library succesfully\n";
     }
 
     free(cookies);
@@ -143,7 +142,10 @@ void get_books(int *sockfd) {
     }
     else {
         char *json_response = basic_extract_json_response(response);
-        parse_books_and_print(json_response);
+        if(json_response != NULL)
+            parse_books_and_print(json_response);
+        else
+            std::cout << "No books in library!\n";
     }
 
     free(message);
@@ -163,7 +165,7 @@ void get_book(int *sockfd) {
 
     int_id = atoi(id);
     if(int_id == 0) { // check id intregrity
-        std::cout << "Id-ul introdus trebuie sa fie un numar intreg\n";
+        std::cout << "ID must be an integer\n";
         return;
     }
 
@@ -180,12 +182,13 @@ void get_book(int *sockfd) {
         reopen_connection_and_send(sockfd, &response, message);
 
     if(!check_respond(response)) {
-        std::cout << "Id-ul introdus este invalid\n";
+        std::cout << "ID is not found in the database\n";
        
     }
     else {
         char *json_response = basic_extract_json_response(response);
-        parse_books_and_print(json_response);
+        if(json_response != NULL)
+            parse_books_and_print(json_response);
     }
 
     free(message);
@@ -272,7 +275,7 @@ void delete_book(int *sockfd) {
 
     int_id = atoi(id);
     if(int_id == 0) { // check id intregrity
-        std::cout << "Id-ul introdus trebuie sa fie un numar intreg\n";
+        std::cout << "ID must be an integer\n";
         return;
     }
 
@@ -289,11 +292,11 @@ void delete_book(int *sockfd) {
         reopen_connection_and_send(sockfd, &response, message);
 
     if(!check_respond(response)) {
-        std::cout << "Id-ul introdus este invalid\n";
+        std::cout << "ID is not found in the database\n";
        
     }
     else {
-        std::cout << "Cartea a fost eliminata cu success\n";
+        std::cout << "Book deleted succesfully\n";
     }
 
     free(message);
