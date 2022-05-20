@@ -40,3 +40,6 @@ peda-*
 
 # MAC
 client.dSYM
+
+# ZIP
+*.zip

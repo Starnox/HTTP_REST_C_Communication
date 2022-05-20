@@ -17,6 +17,11 @@ char *session_cookie;
 char *token;
 
 void login(int *sockfd) {
+    if(strlen(session_cookie) != 0) {
+        std::cout << "You are already logged in!\n";
+        return;
+    }
+
     char *message, *response;
     char username[LINELEN];
     char password[LINELEN];
